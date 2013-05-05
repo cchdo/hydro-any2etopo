@@ -12,7 +12,8 @@ def any_to_track_json(infile, ):
         return EMPTY
 
     try:
-        datafile = libcchdo.fns.read_arbitrary(infile, infile.filename)
+        datafile = libcchdo.fns.read_arbitrary(infile,
+                file_name=str(infile.filename))
     except Exception as e:
         import traceback
         traceback.print_exc(e)
