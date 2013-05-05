@@ -1,0 +1,38 @@
+#map {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+.ui-dialog {
+  background-color: #ddd;
+  overflow: hidden;
+  /* Prevent the dialogs from shifting around when the user changes focus
+  between them. By default, position:relative makes them move weirdly. */
+  position: absolute !important;
+}
+.ui-dialog-titlebar {
+  background-color: #ccc;
+  padding: 0.25em;
+}
+.ui-dialog .ui-dialog-titlebar-close {
+  float: right;
+  background-color: #aaa;
+  border: none;
+}
+.ui-dialog-content {
+  padding: 0.25em;
+}
+.ui-dialog-titlebar {
+  padding-left: 1em;
+}
+
+
+#hydro-plot-etopo-go { margin-top: 0.5em; margin-left: 1em; }
+
+div.bounds-inputs-container input {
+  width: 5em;
+}

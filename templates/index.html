@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/static/css/index.css" />
+
+<div id="map"></div>
+
+<div id="opts-dialog" title="hydro plot etopo">
+
+    <form id="upload-form" method="POST" action="/"
+        enctype="multipart/form-data">
+      <label for="datafile">Data file:</label>
+      <input type="file" id="datafile" name="datafile" />
+    </form>
+
+  <form method="POST" action="/crop" enctype="multipart/form-data">
+    <input id="trackjson" type="hidden" name="trackjson" value="{{trackjson}}" />
+    <table>
+      <tr>
+        <td><label for="etopo">ETOPO resolution:</label></td>
+        <td><select id="etopo" name="etopo_resolution">
+          <option>1</option>
+          <option>2</option>
+          <option selected>5</option>
+          <option>30</option>
+          <option>60</option>
+          <option value="-1">Don't use ETOPO</option>
+        </select></td>
+      </tr>
+      <tr>
+        <td><label for="imgwidth">Image width:</label></td>
+        <td><select id="imgwidth" name="width">
+          <option>240</option>
+          <option>320</option>
+          <option>480</option>
+          <option selected>720</option>
+          <option>1024</option>
+        </select></td>
+      </tr>
+      <tr>
+        <td><label for="fillconts">Fill continents?</label></td>
+        <td><input type="checkbox" id="fillconts" name="fill_continents" /></td>
+      </tr>
+      <tr>
+        <td><label for="proj">Projection:</label></td>
+        <td><select id="proj" name="projection">
+          <option selected>merc</option>
+          <option>robin</option>
+          <option>npstere</option>
+          <option>spstere</option>
+          <option>tmerc</option>
+        </select></td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div id="projbounds-rect" class="bounds-inputs-container">
+            <table>
+              <tr>
+                <td></td>
+                <td>
+                  <label for="bd-cyl-n">N:</label>
+                  <input type="number" id="bd-cyl-n" name="bounds_cylindrical_north" />
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="bd-cyl-w">W:</label>
+                  <input type="number" id="bd-cyl-w" name="bounds_cylindrical_west" />
+                </td>
+                <td></td>
+                <td>
+                  <label for="bd-cyl-e">E:</label>
+                  <input type="number" id="bd-cyl-e" name="bounds_cylindrical_east" />
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <label for="bd-cyl-s">S:</label>
+                  <input type="number" id="bd-cyl-s" name="bounds_cylindrical_south" />
+                </td>
+                <td></td>
+              </tr>
+            </table>
+          </div>
+          <div id="projbounds-stere" class="bounds-inputs-container">
+            <label for="bd-stere">Meridian:</label>
+            <input type="number" id="bd-stere" name="bounds_elliptical" />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td><label for="colormap">Color map:</label></td>
+        <td><select id="colormap" name="cmap">
+          <option>gray</option>
+          <option>goship</option>
+          <option selected>cberys</option>
+          <option>ushydro</option>
+        </select></td>
+      </tr>
+    </table>
+    <input type="hidden" id="plot-title" name="title" />
+    <input id="hydro-plot-etopo-go" type="submit" value="Generate" />
+  </form>
+</div>
+
+<div id="title-dialog" title="Plot title">
+  <table>
+    <tr>
+      <td><label for="sect_id">Section ID:</label></td>
+      <td><input id="sect_id" /></td>
+    </tr>
+    <tr>
+      <td><label for="pi">Principal investigator:</label></td>
+      <td><input id="pi" /></td>
+    </tr>
+    <tr>
+      <td><label for="inst">Second investigator or institution:</label></td>
+      <td><input id="inst" /></td>
+    </tr>
+    <tr>
+      <td><label for="ship">Ship:</label></td>
+      <td><input id="ship" /></td>
+    </tr>
+    <tr>
+      <td><label for="year">Year:</label></td>
+      <td><input id="year" type="number" /></td>
+    </tr>
+    <tr>
+      <td><label for="expo">Expocode:</label></td>
+      <td><input id="expo" /></td>
+    </tr>
+  </table>
+  <div>Preview:</div>
+  <pre id="title-preview">---</pre>
+</div>
+
+<script src="http://code.jquery.com/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/jquery-ui-git.js"></script>
+<script src="https://maps.google.com/maps/api/js?sensor=false"></script>
+<script src="/static/js/dialogs.js"></script>
+<script src="/static/js/subtitle.js"></script>
+<script src="/static/js/datafile.js"></script>
+<script src="/static/js/bounds.js"></script>
