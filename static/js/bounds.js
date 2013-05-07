@@ -63,19 +63,22 @@ function syncDialogWithRect() {
   var rect = window.any2trk.rect;
   var ne = rect.getBounds().getNorthEast();
   var sw = rect.getBounds().getSouthWest();
-  $('#bd-cyl-n').val(bounds.north = ne.lat().toFixed(1));
-  $('#bd-cyl-s').val(bounds.south = sw.lat().toFixed(1));
-  $('#bd-cyl-e').val(bounds.east = ne.lng().toFixed(1));
-  $('#bd-cyl-w').val(bounds.west = sw.lng().toFixed(1));
+  $('#bd-cyl-n').val(bounds.north = parseFloat(ne.lat().toFixed(1)));
+  $('#bd-cyl-s').val(bounds.south = parseFloat(sw.lat().toFixed(1)));
+  $('#bd-cyl-e').val(bounds.east = parseFloat(ne.lng().toFixed(1)));
+  $('#bd-cyl-w').val(bounds.west = parseFloat(sw.lng().toFixed(1)));
 }
 
 
 function syncRectWithDialog() {
   inverseAware.northSouth();
   inverseAware.eastWest();
-  window.any2trk.rect.setBounds(new google.maps.LatLngBounds(
+  var newbounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(bounds.south, bounds.west),
-      new google.maps.LatLng(bounds.north, bounds.east)));
+      new google.maps.LatLng(bounds.north, bounds.east));
+  window.any2trk.rectIsRounded = false;
+  window.any2trk.rect.setBounds(newbounds);
+  window.any2trk.map.fitBounds(newbounds);
 }
 
 
@@ -87,9 +90,10 @@ google.maps.event.addListener(window.any2trk.rect, "bounds_changed",
     function onRectangleBoundsChanged() {
   var rounded = google.maps.LatLngBounds.roundToTenth(
       window.any2trk.rect.getBounds());
-  if(rounded.equals(window.any2trk.rect.getBounds()))
-    return;
-  rect.setBounds(rounded);
+  if(window.any2trk.rectIsRounded) return;
+  window.any2trk.rectIsRounded = true;
+  window.any2trk.rect.setBounds(rounded);
+  window.any2trk.map.fitBounds(rounded);
   syncDialogWithRect();
 });
 
