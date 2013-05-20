@@ -160,17 +160,20 @@ def synthesize_archive(tmpdir, form, ):
     import StringIO
     import PIL.Image
 
+    archivename = os.path.join(tmpdir, "etopo.zip")
     bigimage = os.path.join(tmpdir, "etopo.png")
     smallimage = os.path.join(tmpdir, "thumb.png")
-    buf = StringIO.StringIO()
-    zf = zipfile.ZipFile(buf)
+
+    try:
+        zf = zipfile.ZipFile(archivename, 'w')
+    except:
+        return (None, 404)
 
     try:
         # This fails if the tmpdir isn't valid.
         zf.write(bigimage, "etopo.png")
     except:
         zf.close()
-        buf.close()
         return (None, 404)
 
     try:
@@ -179,7 +182,6 @@ def synthesize_archive(tmpdir, form, ):
         thumb = img.crop(image_bounds_from(form))
     except:
         zf.close()
-        buf.close()
         return (None, 500)
 
     # If we've gotten this far, we've probably made sure that the tmpdir
@@ -191,6 +193,5 @@ def synthesize_archive(tmpdir, form, ):
     zf.write(smallimage, "thumb.png")
     zf.close()
 
-    content = buf.getvalue()
-    buf.close()
-    return (content, 200)
+    with open(archivename, "r") as f:
+        return (f.read(), 200)

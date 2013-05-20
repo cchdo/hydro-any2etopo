@@ -44,10 +44,10 @@ def bigimage(t):
 
 @app.route("/download/<t>", methods=["POST"])
 def download(t):
-    tmpdir = base64.urlsafe_b64decode(t)
+    tmpdir = base64.urlsafe_b64decode(str(t))
 
     # Crop the image and synthesize the image archive.
-    content, respcode = util.synthesize_archive(t, flask.request.form)
+    content, respcode = util.synthesize_archive(tmpdir, flask.request.form)
     if respcode is not 200:
         flask.abort(respcode)
 
