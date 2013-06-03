@@ -72,7 +72,7 @@ function syncDialogWithRect() {
 
 function syncRectWithDialog() {
   inverseAware.northSouth();
-  inverseAware.eastWest();
+  //inverseAware.eastWest();
   var newbounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(bounds.south, bounds.west),
       new google.maps.LatLng(bounds.north, bounds.east));
@@ -90,7 +90,7 @@ google.maps.event.addListener(window.any2trk.rect, "bounds_changed",
     function onRectangleBoundsChanged() {
   var rounded = google.maps.LatLngBounds.roundToTenth(
       window.any2trk.rect.getBounds());
-  if(window.any2trk.rectIsRounded) return;
+  if(window.any2trk.rectIsRounded) { window.any2trk.rectIsRounded = false; return; }
   window.any2trk.rectIsRounded = true;
   window.any2trk.rect.setBounds(rounded);
   window.any2trk.map.fitBounds(rounded);

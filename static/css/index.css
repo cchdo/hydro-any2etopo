@@ -36,3 +36,32 @@
 div.bounds-inputs-container input {
   width: 5em;
 }
+
+
+.datafile-loading-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.datafile-loading-spinner-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  z-index: 2;
+}
+
+.datafile-loading-spinner-container > div {
+  float: left;
+  width: 100%;
+  height: 50%;
+  margin-bottom: -64px;
+}

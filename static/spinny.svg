@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128">
+  <g>
+    <defs>
+      <linearGradient id="lg" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#fff" stop-opacity="0.8" />
+        <stop offset="5%" stop-color="#fff" stop-opacity="0.8" />
+        <stop offset="95%" stop-color="#fff" stop-opacity="0" />
+        <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+  </g>
+<!--rect x="0" y="0" width="128" height="128" fill="#003" stroke="none" /-->
+  <g transform="translate(64,64)">
+  <path d="M0,-64A64,64,0,0,0,0,64L0,52A52,52,0,0,1,0,-52z" fill="url(#lg)">
+    <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0" to="360" begin="0s" dur="2s" repeatCount="indefinite" fill="freeze" />
+  </path>
+  </g>
+</svg>

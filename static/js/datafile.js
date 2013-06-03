@@ -7,6 +7,14 @@
   floats as JSON output.
   */
   $('#datafile').change(function() {
+    $('<div>').
+        addClass('datafile-loading-overlay').
+        appendTo($(document.body));
+    /*$('<div>').
+        addClass('datafile-loading-spinner-container').
+        append($('<div>')).
+        append($('<img src="/static/spinny.svg" />')).
+        appendTo($(document.body));*/
     $('#upload-form')[0].submit();
   });
 
@@ -97,6 +105,7 @@
           strokeColor: '#6199df',
           strokeOpacity: 0.5,
           strokeWeight: 2,
+          zIndex: 0,
           map: window.any2trk.map
       });
 
@@ -111,13 +120,15 @@
             map: window.any2trk.map,
             position: latlng,
             draggable: false,
+            title: latlng.toString(),
             icon: {
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 3,
                 fillColor: '#f87',
                 fillOpacity: 1.0,
                 strokeColor: '#000',
-                strokeWeight: 2
+                strokeWeight: 2,
+                zIndex: 1
             }
         };
       });
