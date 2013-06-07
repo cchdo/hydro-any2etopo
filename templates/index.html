@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 
 <link rel="stylesheet" href="/static/css/index.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+<title>hydro plot etopo</title>
 
 <div id="map"></div>
 
@@ -15,7 +18,7 @@
 
   <form method="POST" action="/crop" enctype="multipart/form-data">
     <input id="trackjson" type="hidden" name="trackjson" value="{{trackjson}}" />
-    <table>
+    <table id="opts-form-table">
       <tr>
         <td><label for="etopo">ETOPO resolution:</label></td>
         <td><select id="etopo" name="etopo_resolution">
@@ -85,7 +88,7 @@
             </table>
           </div>
           <div id="projbounds-stere" class="bounds-inputs-container">
-            <label for="bd-stere">Meridian:</label>
+            <label for="bd-stere">Parallel:</label>
             <input type="number" id="bd-stere" name="bounds_elliptical" />
           </div>
         </td>

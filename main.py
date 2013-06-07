@@ -49,6 +49,7 @@ def download(t):
     # Crop the image and synthesize the image archive.
     content, respcode = util.synthesize_archive(tmpdir, flask.request.form)
     if respcode is not 200:
+        shutil.rmtree(tmpdir, ignore_errors=True)
         flask.abort(respcode)
 
     # Synthesize the response.

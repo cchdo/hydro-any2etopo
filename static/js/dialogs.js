@@ -23,24 +23,6 @@ function _toggleDialogInstead(evt, jqui) {
 }
 
 
-$('#title-dialog').dialog({
-  width: '400px',
-  position: {my: "right bottom", at: "right bottom", of: $('#map')},
-  beforeClose: _toggleDialogInstead
-});
-
-
-$('#opts-dialog').dialog({
-  width: '400px',
-  position: {my: "right top", at: "right top", of: $('#map')},
-  beforeClose: _toggleDialogInstead
-});
-
-
-$('#title-dialog').parent().find(DialogCloseButton).text(HIDE);
-$('#opts-dialog').parent().find(DialogCloseButton).text(HIDE);
-
-
 function shiftDialogWidget(_widget, _marginX, _marginY) {
   var _offset = _widget.offset();
   _offset.left += _marginX;
@@ -49,8 +31,34 @@ function shiftDialogWidget(_widget, _marginX, _marginY) {
 }
 
 
-shiftDialogWidget($('#title-dialog').dialog('widget'), -14, -14);
+if($('#trackjson').val() !== "") {
+  $('#title-dialog').dialog({
+    width: '400px',
+    position: {my: "right bottom", at: "right bottom", of: $('#map')},
+    beforeClose: _toggleDialogInstead
+  });
+  shiftDialogWidget($('#title-dialog').dialog('widget'), -14, -14);
+}
+else {
+  $('#title-dialog').hide();
+}
+
+
+$('#opts-dialog').dialog({
+  dialogClass: "monospace-title",
+  width: '400px',
+  position: {my: "right top", at: "right top", of: $('#map')},
+  beforeClose: _toggleDialogInstead
+});
 shiftDialogWidget($('#opts-dialog').dialog('widget'), -14, 14);
+if($('#trackjson').val() === "") {
+  $('#opts-form-table').hide();
+  $('#hydro-plot-etopo-go').hide();
+}
+
+
+$('#title-dialog').parent().find(DialogCloseButton).text(HIDE);
+$('#opts-dialog').parent().find(DialogCloseButton).text(HIDE);
 
 
 })(jQuery);

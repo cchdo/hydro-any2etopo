@@ -58,16 +58,37 @@ def valid_bounds_in(kwargs, ):
                 "bounds_cylindrical_east", "bounds_cylindrical_west", )])
 
 
+def needs_track_correction(kwargs, ):
+    if "projection" not in kwargs or \
+            kwargs["projection"] in ("npstere", "spstere", ):
+        return False
+    (west, south, east, north) = map(float,
+            [kwargs["bounds_cylindrical_%s" % d]
+            for d in ("west", "south", "east", "north", )])
+    return east < west and east < 0
+
+
 def bounds_argument_from(kwargs, ):
     projection = "merc" if "projection" not in kwargs else kwargs["projection"]
     if projection in ("npstere", "spstere", ):
         return ["--bounds_elliptical", kwargs["bounds_elliptical"], ]
     else:
+        (west, south, east, north) = map(float,
+                [kwargs["bounds_cylindrical_%s" % d]
+                for d in ("west", "south", "east", "north", )])
+        if east < west:
+            if east < 0:
+                east += 360.0
+            else:
+                east, west = west, east
+        if north < south:
+            north, south = south, north
+        
         return ["--bounds-cylindrical",
-                str(kwargs["bounds_cylindrical_west"]),  # lower left longitude
-                str(kwargs["bounds_cylindrical_south"]), # lower left latitude
-                str(kwargs["bounds_cylindrical_east"]),  # upper right longitude
-                str(kwargs["bounds_cylindrical_north"]), # upper right latitude
+                str(west),  # lower left longitude
+                str(south), # lower left latitude
+                str(east),  # upper right longitude
+                str(north), # upper right latitude
         ]
 
 
@@ -119,6 +140,12 @@ def hydro_plot_etopo(trackjson, kwargs):
     trackfile = os.path.join(tmpdir, "na.txt")
     bigimage = os.path.join(tmpdir, "etopo.png")
 
+    # Spin the track around to positive values if it crosses the longitude
+    # discontinuity line.
+    if needs_track_correction(kwargs):
+        track = [((lon + 360.0, lat) if lon < 0 else (lon, lat))
+                for lon, lat in track]
+
     # Write the track to the temporary file.
     with open(trackfile, "w") as f:
         print >> f, "\n".join(["%f %f" % tuple(point) for point in track])
@@ -156,42 +183,73 @@ def image_bounds_from(form, ):
 
 def synthesize_archive(tmpdir, form, ):
     import os.path
+    #import shutil
     import zipfile
     import StringIO
     import PIL.Image
 
-    archivename = os.path.join(tmpdir, "etopo.zip")
-    bigimage = os.path.join(tmpdir, "etopo.png")
-    smallimage = os.path.join(tmpdir, "thumb.png")
+    ARCHIVENAME = "etopo.zip"
+    BIGIMAGENAME = "etopo.png"
+    CROPPEDIMAGENAME = "thumb_big.png"
+    SMALLIMAGENAME = "thumb_small.png"
+
+    archive = os.path.join(tmpdir, ARCHIVENAME)
+    bigimage = os.path.join(tmpdir, BIGIMAGENAME)
+    croppedimage = os.path.join(tmpdir, CROPPEDIMAGENAME)
+    smallimage = os.path.join(tmpdir, SMALLIMAGENAME)
 
     try:
-        zf = zipfile.ZipFile(archivename, 'w')
-    except:
+        # Open an archive for writing.
+        # This raises IOError if the tmpdir is not valid.
+        zf = zipfile.ZipFile(archive, "w")
+    except IOError:
         return (None, 404)
 
     try:
-        # This fails if the tmpdir isn't valid.
-        zf.write(bigimage, "etopo.png")
+        # Write the big image into the archive.
+        # This raises an exception if the big image doesn't exist.
+        zf.write(bigimage, BIGIMAGENAME)
     except:
+        # Clean up all the temporary files.
         zf.close()
-        return (None, 404)
-
-    try:
-        img = PIL.Image.open(bigimage)
-        # Maybe there are invalid bounds?
-        thumb = img.crop(image_bounds_from(form))
-    except:
-        zf.close()
+        #shutil.rmtree(tmpdir)
         return (None, 500)
 
-    # If we've gotten this far, we've probably made sure that the tmpdir
-    # exists (because we read the big image from it).
+    # Synthesize the cropped version of the big image. It's still large,
+    # but it's cropped.
+    img = PIL.Image.open(bigimage)
+    cropped = img.crop(image_bounds_from(form))
+    with open(croppedimage, "w") as f:
+        cropped.save(f)
+
+    try:
+        # Write the cropped image.
+        zf.write(croppedimage, "thumb_big.png")
+    except:
+        # Clean up all the temporary files.
+        zf.close()
+        #shutil.rmtree(tmpdir)
+        return (None, 500)
+
+    # Synthesize the small cropped version of the image. This will be the
+    # thumbnail image.
+    img = PIL.Image.open(croppedimage)
+    small = img.resize((80, 80), PIL.Image.BILINEAR)
     with open(smallimage, "w") as f:
-        thumb.save(f)
+        small.save(f)
 
-    # Write the cropped image.
-    zf.write(smallimage, "thumb.png")
+    try:
+        # Write the thumbnail image.
+        zf.write(smallimage, "thumb_small.png")
+    except:
+        # Clean up all the temporary files.
+        zf.close()
+        #shutil.rmtree(tmpdir)
+        return (None, 500)
+
+    # Finish up the archive and respond with its content.
     zf.close()
-
-    with open(archivename, "r") as f:
-        return (f.read(), 200)
+    with open(archive, "r") as f:
+        content = f.read()
+        #shutil.rmtree(tmpdir)
+        return (content, 200)

@@ -29,6 +29,9 @@
 .ui-dialog-titlebar {
   padding-left: 1em;
 }
+.ui-dialog.monospace-title .ui-dialog-titlebar span {
+  font-family: monospace;
+}
 
 
 #hydro-plot-etopo-go { margin-top: 0.5em; margin-left: 1em; }
