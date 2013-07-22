@@ -70,12 +70,27 @@ function syncDialogWithRect() {
 }
 
 
+function usingStereographicProjection() {
+  return (function(proj) {
+    return proj === "npstere" || proj === "spstere";
+  })($('#proj').val());
+}
+
+
 function syncRectWithDialog() {
   inverseAware.northSouth();
   //inverseAware.eastWest();
-  var newbounds = new google.maps.LatLngBounds(
-      new google.maps.LatLng(bounds.south, bounds.west),
-      new google.maps.LatLng(bounds.north, bounds.east));
+  var newbounds;
+  if(usingStereographicProjection()) {
+    newbounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(clamp(bounds.south, -85, 85), bounds.west),
+        new google.maps.LatLng(clamp(bounds.north, -85, 85), bounds.east));
+  }
+  else {
+    newbounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(bounds.south, bounds.west),
+        new google.maps.LatLng(bounds.north, bounds.east));
+  }
   window.any2trk.rectIsRounded = false;
   window.any2trk.rect.setBounds(newbounds);
   window.any2trk.map.fitBounds(newbounds);
@@ -94,6 +109,9 @@ google.maps.event.addListener(window.any2trk.rect, "bounds_changed",
   window.any2trk.rectIsRounded = true;
   window.any2trk.rect.setBounds(rounded);
   window.any2trk.map.fitBounds(rounded);
+  if(usingStereographicProjection()) {
+    return;
+  }
   syncDialogWithRect();
 });
 
@@ -129,6 +147,62 @@ $('#bd-cyl-w').change(function onBoundsWestChanged() {
     $(this).val(bounds.west = clamp(f, MIN_LONGITUDE, MAX_LONGITUDE));
     syncRectWithDialog();
   }
+});
+
+
+$('#bd-stere').change(function onStereographicParallelChanged() {
+  var f = parseFloat($(this).val());
+  if(isNaN(f)) {
+    $(this).css('background-color', '#fcc');
+    return;
+  }
+  else if($('#proj').val() === "npstere") {
+    $(this).val(bounds.south = clamp(window.roundToTenth(f), MIN_LATITUDE, MAX_LATITUDE));
+    bounds.east = MAX_LONGITUDE;
+    bounds.west = MIN_LONGITUDE;
+    bounds.north = MAX_LATITUDE;
+    syncRectWithDialog();
+  }
+  else if($('#proj').val() === "spstere") {
+    $(this).val(bounds.north = clamp(window.roundToTenth(f), MIN_LATITUDE, MAX_LATITUDE));
+    bounds.east = MAX_LONGITUDE;
+    bounds.west = MIN_LONGITUDE;
+    bounds.south = MIN_LATITUDE;
+    syncRectWithDialog();
+  }
+});
+
+
+$('#proj').change(function onProjectionChanged() {
+  if($(this).val() === "npstere") {
+    bounds.north = MAX_LATITUDE;
+    if(!$('#bd-stere').val()) $('#bd-stere').val(0);
+    var f = parseFloat($('#bd-stere').val());
+    bounds.south = clamp(window.roundToTenth(f), MIN_LATITUDE, MAX_LATITUDE);
+    bounds.east = MAX_LONGITUDE;
+    bounds.west = MIN_LONGITUDE;
+  }
+  else if($(this).val() === "spstere") {
+    bounds.south = MIN_LATITUDE;
+    if(!$('#bd-stere').val()) $('#bd-stere').val(0);
+    var f = parseFloat($('#bd-stere').val());
+    bounds.north = clamp(window.roundToTenth(f), MIN_LATITUDE, MAX_LATITUDE);
+    bounds.east = MAX_LONGITUDE;
+    bounds.west = MIN_LONGITUDE;
+  }
+  else {
+    $.each([$('#bd-cyl-n'), $('#bd-cyl-s'), $('#bd-cyl-e'), $('#bd-cyl-w')],
+        function(i, e) { if(!e.val()) e.val(0); if(isNaN(parseFloat(e.val()))) e.val(0); });
+    bounds.north = clamp(window.roundToTenth(parseFloat($('#bd-cyl-n').val())),
+        MIN_LATITUDE, MAX_LATITUDE);
+    bounds.south = clamp(window.roundToTenth(parseFloat($('#bd-cyl-s').val())),
+        MIN_LATITUDE, MAX_LATITUDE);
+    bounds.east = clamp(window.roundToTenth(parseFloat($('#bd-cyl-e').val())),
+        MIN_LONGITUDE, MAX_LONGITUDE);
+    bounds.west = clamp(window.roundToTenth(parseFloat($('#bd-cyl-w').val())),
+        MIN_LONGITUDE, MAX_LONGITUDE);
+  }
+  syncRectWithDialog();
 });
 
 

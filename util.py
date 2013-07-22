@@ -1,7 +1,9 @@
 """ (XXX)
 """
+from json import dumps as json_dumps
 
-import libcchdo.fns
+from libcchdo.model.datafile import DataFile, DataFileCollection
+from libcchdo.formats.formats import read_arbitrary
 
 
 def uniq(array, ):
@@ -20,7 +22,7 @@ def any_to_track_json(infile, ):
         return EMPTY
 
     try:
-        datafile = libcchdo.fns.read_arbitrary(infile,
+        datafile = read_arbitrary(infile,
                 file_name=str(infile.filename))
     except Exception as e:
         import traceback
@@ -28,24 +30,48 @@ def any_to_track_json(infile, ):
         return EMPTY
 
     if datafile is None:
-        print "libcchdo.fns.read_arbitrary() >>> None"
+        print "read_arbitrary() >>> None"
         return EMPTY
 
-    if "LATITUDE" not in datafile.columns:
-        print '"LATITUDE" not in datafile.columns'
-        return EMPTY
+    if type(datafile) is DataFile:
+        if "LATITUDE" not in datafile:
+            print '"LATITUDE" not in datafile'
+            return EMPTY
 
-    if "LONGITUDE" not in datafile.columns:
-        print '"LONGITUDE" not in datafile.columns'
-        return EMPTY
+        if "LONGITUDE" not in datafile:
+            print '"LONGITUDE" not in datafile'
+            return EMPTY
 
-    track = zip(
-            map(float, datafile.columns["LONGITUDE"].values),
-            map(float, datafile.columns["LATITUDE"].values))
+        track = zip(
+                map(float, datafile["LONGITUDE"].values),
+                map(float, datafile["LATITUDE"].values))
+    elif type(datafile) is DataFileCollection:
+        track = []
+        for dfile in datafile:
+            try:
+                lats = dfile['LATITUDE'].values
+            except KeyError:
+                try:
+                    lats = [dfile.globals['LATITUDE']]
+                except KeyError:
+                    print '"LATITUDE" not in datafile'
+                    continue
+            try:
+                lngs = dfile['LONGITUDE'].values
+            except KeyError:
+                try:
+                    lngs = [dfile.globals['LONGITUDE']]
+                except KeyError:
+                    print '"LONGITUDE" not in datafile'
+                    continue
+
+            track.extend(zip(map(float, lngs), map(float, lats)))
+        print track
+    else:
+        track = []
     track = uniq(track)
 
-    import json
-    return json.dumps(track)
+    return json_dumps(track)
 
 
 def valid_bounds_in(kwargs, ):
@@ -113,7 +139,7 @@ def hydro_plot_etopo(trackjson, kwargs):
 
     # Add the option to fill continents, if requested.
     if "fill_continents" in kwargs:
-        cmd.append("--fill-continents")
+        cmd.append("--fill_continents")
 
     # Add the projection.
     cmd.append("--projection")

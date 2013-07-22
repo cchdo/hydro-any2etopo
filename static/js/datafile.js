@@ -20,7 +20,7 @@
 
 
   /* Basic utility function for rounding a number to the nearest tenth. */
-  function roundToTenth(f) {
+  window.roundToTenth = function roundToTenth(f) {
     //return Math.round(f * 10) * 0.1;
     return f.toFixed(1);
   }
